@@ -59,6 +59,7 @@ const updateUserBalance = async (req, res) => {
             const transaction = { userId: updatedUser._id, type: method, amount };
             const newTransaction = new Transaction(transaction);
             const savedTransaction = await newTransaction.save()
+            updatedUser.balance = newBalance;
             res.status(STATUS_CODES.OK).json({
                 user: updatedUser,
                 transaction: savedTransaction,
@@ -88,6 +89,20 @@ const getUserTransactions = async (req, res) => {
     }
 };
 
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find({}).select(['-__v']);
+        res.status(STATUS_CODES.OK).json({
+            users,
+            message: ALERTS.USER_CONTROLLER.FETCH_SUCCESS
+        });
+    } catch (error) {
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+            message: ALERTS.UNKNOWN_ERROR
+        });
+    }
+};
+
 const transferBalance = async (req, res) => {
     try {
         const { userId, amount } = req.body;
@@ -101,7 +116,7 @@ const transferBalance = async (req, res) => {
         }else {
             const toUser = await User.findById(userId);
             fromUserBalance = fromUserBalance - amount;
-            toUserBalance = toUser.balance - amount;
+            toUserBalance = toUser.balance + amount;
             const updatedFromUser = await User.findByIdAndUpdate(fromUser._id, {balance: fromUserBalance},
                 {timestamps: {createdAt: false, updatedAt: false}});
             const updatedToUser = await User.findByIdAndUpdate(toUser._id, {balance: toUserBalance},
@@ -130,5 +145,6 @@ module.exports = {
     updateUserProfile,
     updateUserBalance,
     getUserTransactions,
+    getAllUsers,
     transferBalance
 };

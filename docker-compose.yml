@@ -1,0 +1,28 @@
+version: '3.7'
+
+services:
+  app:
+    container_name: finance-management-app
+    build:
+      context: ./
+    image: finance-management-app
+    environment:
+      mongoURi: mongodb://dbserver:27017/finance-management
+      PORT: 4200
+      jwtSecretKey: asdfghjkl1234567890!@#$%^&*()
+    ports:
+      - "4200:4200"
+    depends_on:
+      - dbserver
+
+
+  dbserver:
+    container_name: finance-management-dbserver
+    image: mongo:latest
+    expose:
+      - 27017
+    ports:
+      - '127.0.0.1:27100:27017'
+    volumes:
+      - ./dbdata:/data/db
+

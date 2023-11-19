@@ -22,9 +22,10 @@ const updateUserProfile = async (req, res) => {
         const {name, email, username, password, address, mobile_number} = req.body;
         const salt = bcrypt.genSaltSync(10);
         const hashedPassword = bcrypt.hashSync(password, salt);
-        const updatedUser = await User.findByIdAndUpdate(req.params.id,
+        await User.findByIdAndUpdate(req.params.id,
             {name, email, password: hashedPassword, username, address, mobile_number},
             {timestamps: {createdAt: false, updatedAt: true}});
+        const updatedUser = await User.findById(req.params.id);
         res.status(STATUS_CODES.OK).json({
             user: updatedUser,
             message: ALERTS.USER_CONTROLLER.UPDATE_SUCCESS
@@ -54,12 +55,12 @@ const updateUserBalance = async (req, res) => {
                 newBalance = newBalance + parseInt(amount);
                 message = ALERTS.USER_CONTROLLER.BALANCE_TOPUP_SUCCESS;
             }
-            const updatedUser = await User.findByIdAndUpdate(req.params.id, {balance: newBalance},
+            await User.findByIdAndUpdate(req.params.id, {balance: newBalance},
                 {timestamps: {createdAt: false, updatedAt: false}});
-            const transaction = { userId: updatedUser._id, type: method, amount };
+            const transaction = { userId: req.params.id, type: method, amount };
             const newTransaction = new Transaction(transaction);
-            const savedTransaction = await newTransaction.save()
-            updatedUser.balance = newBalance;
+            const savedTransaction = await newTransaction.save();
+            const updatedUser = await User.findById(req.params.id);
             res.status(STATUS_CODES.OK).json({
                 user: updatedUser,
                 transaction: savedTransaction,

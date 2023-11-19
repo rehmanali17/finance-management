@@ -48,6 +48,8 @@ const slice = createSlice({
     signupSuccess: (state, action) => {
       state.user = action.payload.user;
       state.accessToken = action.payload.accessToken;
+      localStorage.setItem("user", JSON.stringify(state.user))
+      localStorage.setItem("accessToken", state.accessToken)
       state.requestError = {
         isError: false,
         message: "",
@@ -63,9 +65,9 @@ const slice = createSlice({
       state.successMessage = "";
     },
     updateProfileSuccess: (state, action) => {
-      localStorage.setItem("user", JSON.stringify(action.payload.user))
       state.user = action.payload.user;
       state.successMessage = action.payload.message;
+      localStorage.setItem("user", JSON.stringify(state.user))
       state.requestError = {
         isError: false,
         message: "",
@@ -169,7 +171,7 @@ export const updateProfile = (values, user, accessToken) => async dispatch => {
 export const updateBalance = (values, method, userId, accessToken) => async dispatch => {
   try {
     dispatch(requestInitiated());
-    const response = await axios.patch(`${API_URL}/api/user/balance/${user._id}`, {
+    const response = await axios.patch(`${API_URL}/api/user/balance/${userId}`, {
       amount: values.amount,
       method
     }, {
@@ -189,7 +191,7 @@ export const updateBalance = (values, method, userId, accessToken) => async disp
 export const transferBalance = (values, userId, accessToken) => async dispatch => {
   try {
     dispatch(requestInitiated());
-    const response = await axios.patch(`${API_URL}/api/user/transfer/${user._id}`, {
+    const response = await axios.patch(`${API_URL}/api/user/transfer/${userId}`, {
       amount: values.amount,
       userId: values.user
     }, {
